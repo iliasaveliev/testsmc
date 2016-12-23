@@ -86,10 +86,10 @@ Disconnected
 WaitForInterfacesUp
 Entry {InterfaceCountClear();StartWaitIntrefacesTimer();}
 {
-	InterfaceUp(modemInterface: int)		 [ctxt.GetInterfaceCount()==1] Ready/push(Map1::Start)									{InterfaceCountAdd();}			
-	InterfaceUp(modemInterface: int)		 [ctxt.GetInterfaceCount()==0] nil										{InterfaceCountAdd();}			
-	Disconnect						 [ctxt.GetInterfaceCount()==0] Disconnected								{DisconnectModem();}		
-	Disconnect						 [ctxt.GetInterfaceCount()>0]  WaitForInterfacesDown					{DisconnectModem();}		
+	InterfaceUp(modemInterface: int)		 [this.GetInterfaceCount()==1] Ready/push(Map1::Start)									{InterfaceCountAdd();}			
+	InterfaceUp(modemInterface: int)		 [this.GetInterfaceCount()==0] nil										{InterfaceCountAdd();}			
+	Disconnect						 [this.GetInterfaceCount()==0] Disconnected								{DisconnectModem();}		
+	Disconnect						 [this.GetInterfaceCount()>0]  WaitForInterfacesDown					{DisconnectModem();}		
 	InterfaceDown(modemInterface: int)								   nil										{InterfaceCountDec();}	
 	InterfacesTimeout				 WaitForInterfacesUp													{DisconnectModem();ConnectModem();}
 }
@@ -107,15 +107,15 @@ Ready
 
 WaitForRestart
 {
-	InterfaceDown(modemInterface: int)	 [ctxt.GetInterfaceCount()==1] WaitForInterfacesUp	{InterfaceCountDec();PowerOn();}			
-	InterfaceDown(modemInterface: int)	 [ctxt.GetInterfaceCount()==2] nil					{InterfaceCountDec();}			
+	InterfaceDown(modemInterface: int)	 [this.GetInterfaceCount()==1] WaitForInterfacesUp	{InterfaceCountDec();PowerOn();}			
+	InterfaceDown(modemInterface: int)	 [this.GetInterfaceCount()==2] nil					{InterfaceCountDec();}			
 	InterfaceUp(modemInterface: int)		  nil												{InterfaceCountAdd();}			
 }
 
 WaitForInterfacesDown
 {
-	InterfaceDown(modemInterface: int)	 [ctxt.GetInterfaceCount()==1] Disconnected	{InterfaceCountDec();}			
-	InterfaceDown(modemInterface: int)	 [ctxt.GetInterfaceCount()==2] nil			{InterfaceCountDec();}			
+	InterfaceDown(modemInterface: int)	 [this.GetInterfaceCount()==1] Disconnected	{InterfaceCountDec();}			
+	InterfaceDown(modemInterface: int)	 [this.GetInterfaceCount()==2] nil			{InterfaceCountDec();}			
 	InterfaceUp(modemInterface: int)		 nil										{InterfaceCountAdd();}	
 }
 
