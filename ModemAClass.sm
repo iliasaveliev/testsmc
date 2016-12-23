@@ -108,7 +108,7 @@ Ready
 WaitForRestart
 {
 	InterfaceDown(modemInterface: int)	 [this.GetInterfaceCount()==1] WaitForInterfacesUp	{InterfaceCountDec();PowerOn();}			
-	InterfaceDown(modemInterface: int)	 [this.GetInterfaceCount()==3] nil					{InterfaceCountDec();}			
+	InterfaceDown(modemInterface: int)	 [this.GetInterfaceCount()==33] nil					{InterfaceCountDec();}			
 	InterfaceUp(modemInterface: int)		  nil												{InterfaceCountAdd();}			
 }
 
