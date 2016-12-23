@@ -1,0 +1,124 @@
+// -*- tab-width: 4; -*-
+
+%{
+// Revision 1.0  2003/12/14 19:11:57  charlesr
+// Initial revision
+//
+%}
+
+%start ModemPower::Disconnected
+%class ModemAClass
+%header   ModemA_sm.h
+
+%map Map1
+%%
+// State		Transition		End State		Action(s)
+
+
+
+Start
+{
+				CPIN_READY				NW_Search		{}
+}
+
+NW_Search
+{
+				CREG_1_5(code: int)	[code==1] Registered			{HandleCREG(code);}
+				CREG_1_5(code: int)	[code==7] NW_Search			{}
+				
+}
+
+Registered
+Entry {StartRegistredTimer();}
+Exit {StopRegistredTimer();}
+{
+				CGACT_11		Attached		{}
+				CREG_0_2_11		NW_Search		{}
+				
+}
+
+Attached
+{
+				APN_OK			PDP_Context_Activated		{}
+				CREG_0_2_11		NW_Search		{}
+				
+}
+
+
+PDP_Context_Activated
+{
+
+
+				CGDCONT_OK			Internet_Available			{}
+				CGEV_DETACH			Attached					{}
+				CPIN_SIM_REMOVED	Start						{HanldeSimRemoved(1);}
+}
+
+Internet_Available
+{
+				
+				CGEV_DETACH			Attached					{}
+				
+}
+
+
+
+Default
+{
+				CPIN_SIM_REMOVED	Start						{HanldeSimRemoved(2);}
+				Disconnect			pop(Disconnect)		{}
+				
+}
+
+%%
+
+%map ModemPower
+%%
+
+
+Disconnected
+{
+				Connect			WaitForInterfacesUp	 {ConnectModem();}
+				Disconnect		nil					 {}
+
+}
+
+WaitForInterfacesUp
+Entry {InterfaceCountClear();StartWaitIntrefacesTimer();}
+{
+	InterfaceUp(modemInterface: int)		 [ctxt.GetInterfaceCount()==1] Ready/push(Map1::Start)									{InterfaceCountAdd();}			
+	InterfaceUp(modemInterface: int)		 [ctxt.GetInterfaceCount()==0] nil										{InterfaceCountAdd();}			
+	Disconnect						 [ctxt.GetInterfaceCount()==0] Disconnected								{DisconnectModem();}		
+	Disconnect						 [ctxt.GetInterfaceCount()>0]  WaitForInterfacesDown					{DisconnectModem();}		
+	InterfaceDown(modemInterface: int)								   nil										{InterfaceCountDec();}	
+	InterfacesTimeout				 WaitForInterfacesUp													{DisconnectModem();ConnectModem();}
+}
+
+
+
+Ready
+{
+				Disconnect						WaitForInterfacesDown	{DisconnectModem();}
+				/*unexpected down*/
+				InterfaceDown(modemInterface: int)	WaitForRestart	{PowerOff();}
+				Connect							nil				{}
+
+}
+
+WaitForRestart
+{
+	InterfaceDown(modemInterface: int)	 [ctxt.GetInterfaceCount()==1] WaitForInterfacesUp	{InterfaceCountDec();PowerOn();}			
+	InterfaceDown(modemInterface: int)	 [ctxt.GetInterfaceCount()==2] nil					{InterfaceCountDec();}			
+	InterfaceUp(modemInterface: int)		  nil												{InterfaceCountAdd();}			
+}
+
+WaitForInterfacesDown
+{
+	InterfaceDown(modemInterface: int)	 [ctxt.GetInterfaceCount()==1] Disconnected	{InterfaceCountDec();}			
+	InterfaceDown(modemInterface: int)	 [ctxt.GetInterfaceCount()==2] nil			{InterfaceCountDec();}			
+	InterfaceUp(modemInterface: int)		 nil										{InterfaceCountAdd();}	
+}
+
+
+
+%%
