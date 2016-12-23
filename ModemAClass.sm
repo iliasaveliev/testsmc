@@ -24,7 +24,7 @@ Start
 NW_Search
 {
 				CREG_1_5(code: int)	[code==1] Registered			{HandleCREG(code);}
-				CREG_1_5(code: int)	[code==7] NW_Search			{}
+				CREG_1_5(code: int)	[code==5] NW_Search			{}
 				
 }
 
